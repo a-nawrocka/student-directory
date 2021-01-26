@@ -24,7 +24,7 @@ def input_students
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
   students = []
-  name = gets.chomp
+  name = gets.strip
   # while the name is not empty, repeat this code
   until name.empty? do
     students << {name: name, cohort: :november}
@@ -35,16 +35,16 @@ def input_students
     end
 
     puts "Where this person was born"
-    place_of_birth = gets.chomp
+    place_of_birth = gets.strip
     students[-1][:birth] = place_of_birth
     
     puts "To which cohort add this person?"
-    cohort = gets.chomp
+    cohort = gets.strip
     if !cohort.empty?
       students[-1][:cohort] = cohort.downcase.to_sym
     end
     
-    name = gets.chomp
+    name = gets.strip
   end
   
   students 
