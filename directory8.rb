@@ -10,7 +10,11 @@ def print(students)
 end 
 
 def print_footer(students)
-  puts "Overall, we have #{students.count} great students"
+  if students.count == 1
+    puts "Now we have 1 student"
+  else 
+    puts "Overall, we have #{students.count} great students"
+  end
 end
 
 # print_header
@@ -24,8 +28,12 @@ def input_students
   # while the name is not empty, repeat this code
   until name.empty? do
     students << {name: name, cohort: :november}
-    puts "Now we have #{students.count} students"
-    
+    if students.count == 1
+      puts "Now we have 1 student"
+    else 
+      puts "Now we have #{students.count} students"
+    end
+
     puts "Where this person was born"
     place_of_birth = gets.chomp
     students[-1][:birth] = place_of_birth
