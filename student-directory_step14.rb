@@ -7,7 +7,7 @@ end
 
 def print_student_list()
   @students.each_with_index do |student, index|
-    puts ("#{index +1}. #{student[:name]} (#{student[:cohort]} cohort) and born in #{student[:birth]}")
+    puts ("#{index +1}. #{student[:name]} (#{student[:cohort]} cohort)")
   end
 end 
 
@@ -36,44 +36,21 @@ def input_students
       puts "Now we have #{@students.count} students"
     end
 
-    puts "Where this person was born"
-    place_of_birth = STDIN.gets.strip
-    @students[-1][:birth] = place_of_birth
-    
     puts "To which cohort add this person?"
     cohort = STDIN.gets.strip
     if !cohort.empty?
       @students[-1][:cohort] = cohort.downcase.to_sym
     end
-    
+    puts "Student was added"
     name = STDIN.gets.strip
-  end
-end
-
-def print_by_cohort()
-  students_by_cohort = {}
-  @students.each do |student|
-    cohort_key = student[:cohort]
-    
-    if !students_by_cohort.has_key?(cohort_key)
-      students_by_cohort[cohort_key] = []
-    end
-    students_by_cohort[cohort_key].push(student[:name])
-  end
-  
-  students_by_cohort.each do |cohort, names|
-    puts cohort.upcase 
-    names.each do |name|
-      puts name
-    end
   end
 end
 
 def print_menu()
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save the list to a file"
+  puts "4. Load the list from a file"
   puts "9. Exit" # 9 because we'll be adding more items  
 end
 
@@ -90,9 +67,11 @@ def process(selection)
     when "2"
       show_students()
     when "3"
-      save_students()
+      filename = get_save_filename()
+      filename == "" ? save_students() : save_students(filename)
     when "4"
-      load_students()
+      filename = get_load_filename()
+      filename == "" ? load_students() : load_students(filename)
     when "9"
       exit
     else
@@ -100,25 +79,39 @@ def process(selection)
   end
 end
 
-def save_students()
-  #open the file
-  file = File.open("students.csv", "w")
-  #iterate over the array
-  @students.each do |student|
-    student_data = [student[:name], student[:cohort]]
-    cvs_line = student_data.join(",")
-    file.puts cvs_line
+def get_save_filename()
+  puts "Where would you like to save students?"
+  STDIN.gets.chomp
+end
+
+def get_load_filename() 
+  puts "Which file would you like to load?"
+  STDIN.gets.chomp
+end
+
+def save_students(filename = "students.csv")
+  file = File.open(filename, "w") do |file|
+    @students.each do |student|
+      student_data = [student[:name], student[:cohort]]
+      cvs_line = student_data.join(",")
+      file.puts cvs_line
+    end
+    
+    puts "List saved to #{file.path}"
   end
-  file.close
 end
 
 def load_students(filename = "students.csv")
-  file = File.open(filename, "r")
-  file.readlines.each do |line|
-    name, cohort = line.chomp.split(',')
-    add_students(name, cohort.to_sym)
+  @students = []
+  
+  file = File.open(filename, "r") do |file|
+    file.readlines.each do |line|
+      name, cohort = line.chomp.split(',')
+      add_students(name, cohort.to_sym)
+    end
   end
-  file.close
+  
+  puts "Loaded #{@students.count} from #{filename}"
 end
 
 def interactive_menu()
@@ -130,17 +123,18 @@ end
 
 def try_load_students
   filename = ARGV.first# first argument from the command line
-  return if filename.nil? # get out of the method if it isn't given
-  
-  if File.exists?(filename) # if it exists
-    load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
-  else # if it doesn't exist
-    puts "Sorry, #{filename} doesn't exist."
-    exit # quit the program
+  if filename.nil?
+    load_students()
+  else
+    if File.exists?(filename) # if it exists
+      load_students(filename)
+    else # if it doesn't exist
+      puts "Sorry, #{filename} doesn't exist."
+      exit
+    end
   end
 end
 
 try_load_students()
-load_students()
 interactive_menu()
+
