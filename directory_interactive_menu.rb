@@ -23,7 +23,7 @@ end
 def input_students
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
-  name = gets.strip
+  name = STDIN.gets.strip
   # while the name is not empty, repeat this code
   until name.empty? do
     @students << {name: name, cohort: :november}
@@ -34,16 +34,16 @@ def input_students
     end
 
     puts "Where this person was born"
-    place_of_birth = gets.strip
+    place_of_birth = STDIN.gets.strip
     @students[-1][:birth] = place_of_birth
     
     puts "To which cohort add this person?"
-    cohort = gets.strip
+    cohort = STDIN.gets.strip
     if !cohort.empty?
       @students[-1][:cohort] = cohort.downcase.to_sym
     end
     
-    name = gets.strip
+    name = STDIN.gets.strip
   end
 end
 
@@ -70,6 +70,7 @@ def print_menu()
   puts "1. Input the students"
   puts "2. Show the students"
   puts "3. Save the list to students.csv"
+  puts "4. Load the list from students.csv"
   puts "9. Exit" # 9 because we'll be adding more items  
 end
 
@@ -87,6 +88,8 @@ def process(selection)
       show_students()
     when "3"
       save_students()
+    when "4"
+      load_students()
     when "9"
       exit
     else
@@ -106,11 +109,34 @@ def save_students()
   file.close
 end
 
+def load_students(filename = "students.csv")
+  file = File.open(filename, "r")
+  file.readlines.each do |line|
+    name, cohort = line.chomp.split(',')
+    @students << {name: name, cohort: cohort.to_sym}
+  end
+  file.close
+end
+
 def interactive_menu()
   loop do
   print_menu()
-  process(gets.chomp)
+  process(STDIN.gets.chomp)
   end
 end
 
+def try_load_students
+  filename = ARGV.first# first argument from the command line
+  return if filename.nil? # get out of the method if it isn't given
+  
+  if File.exists?(filename) # if it exists
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else # if it doesn't exist
+    puts "Sorry, #{filename} doesn't exist."
+    exit # quit the program
+  end
+end
+
+try_load_students()
 interactive_menu()
