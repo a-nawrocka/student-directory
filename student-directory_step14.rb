@@ -1,3 +1,5 @@
+require 'csv'
+
 @students = []
 
 def print_header
@@ -90,25 +92,35 @@ def get_load_filename()
 end
 
 def save_students(filename = "students.csv")
-  file = File.open(filename, "w") do |file|
-    @students.each do |student|
-      student_data = [student[:name], student[:cohort]]
-      cvs_line = student_data.join(",")
-      file.puts cvs_line
-    end
+  # file = File.open(filename, "w") do |file|
+  #   @students.each do |student|
+  #     student_data = [student[:name], student[:cohort]]
+  #     cvs_line = student_data.join(",")
+  #     file.puts cvs_line
+  #   end
     
-    puts "List saved to #{file.path}"
+  #   puts "List saved to #{file.path}"
+  # end
+  CSV.open(filename, "wb") do |csv|
+    @students.each do |student|
+      csv << [student[:name], student[:cohort]]
+    end
   end
+  puts "List saved to #{filename}"
 end
 
 def load_students(filename = "students.csv")
   @students = []
+  # file = File.open(filename, "r") do |file|
+  #   file.readlines.each do |line|
+  #     name, cohort = line.chomp.split(',') # ["ana", "november"]
+  #     add_students(name, cohort.to_sym)
+  #   end
+  # end
   
-  file = File.open(filename, "r") do |file|
-    file.readlines.each do |line|
-      name, cohort = line.chomp.split(',')
-      add_students(name, cohort.to_sym)
-    end
+  CSV.foreach(filename) do |row|
+     name, cohort = row
+     add_students(name, cohort.to_sym)
   end
   
   puts "Loaded #{@students.count} from #{filename}"
